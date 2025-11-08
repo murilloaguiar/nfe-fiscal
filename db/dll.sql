@@ -1,0 +1,44 @@
+CREATE TABLE `NotaFiscal` (
+	`Id` INT(10) NOT NULL AUTO_INCREMENT,
+	`Emissor` VARCHAR(150) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`DataEmissao` DATE NOT NULL DEFAULT (curdate()),
+	PRIMARY KEY (`Id`) USING BTREE
+)
+;
+
+CREATE TABLE `Item` (
+	`Id` INT(10) NOT NULL AUTO_INCREMENT,
+	`NotaFiscalId` INT(10) NOT NULL DEFAULT '0',
+	`Descricao` VARCHAR(255) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`Valor` DECIMAL(15,3) NOT NULL DEFAULT '0',
+	PRIMARY KEY (`Id`) USING BTREE,
+	INDEX `FK_Item_NotaFiscal_NotaFiscalId` (`NotaFiscalId`) USING BTREE,
+	CONSTRAINT `FK_Item_NotaFiscal_NotaFiscalId` FOREIGN KEY (`NotaFiscalId`) REFERENCES `notafiscal` (`Id`) ON UPDATE CASCADE ON DELETE CASCADE
+)-
+;
+
+CREATE TABLE `Jobs` (
+	`Id` INT(10) NOT NULL AUTO_INCREMENT,
+	`Status` ENUM('pending','executing','done','failed') NOT NULL DEFAULT 'pending' COLLATE 'utf8mb4_0900_ai_ci',
+	`ExecutionTime` DOUBLE NULL DEFAULT NULL,
+	`Format` ENUM('txt','json') NOT NULL DEFAULT 'txt' COLLATE 'utf8mb4_0900_ai_ci',
+	`DeletedAt` DATETIME NULL DEFAULT NULL,
+	`InvoiceId` INT(10) NULL DEFAULT NULL,
+	PRIMARY KEY (`Id`) USING BTREE,
+	INDEX `FK_Jobs_NotaFiscal_InvoiceId` (`InvoiceId`) USING BTREE,
+	CONSTRAINT `FK_Jobs_NotaFiscal_InvoiceId` FOREIGN KEY (`InvoiceId`) REFERENCES `NotaFiscal` (`Id`) ON UPDATE CASCADE ON DELETE CASCADE
+)
+;
+
+CREATE TABLE `Exports` (
+	`Id` INT(10) NOT NULL AUTO_INCREMENT,
+	`Format` VARCHAR(50) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`InvoiceId` INT(10) NOT NULL DEFAULT '0',
+	`Path` VARCHAR(255) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`Date` DATETIME NOT NULL DEFAULT (now()),
+	`FileName` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	PRIMARY KEY (`Id`) USING BTREE,
+	INDEX `FK_Exports_NotaFiscal_InvoiceId` (`InvoiceId`) USING BTREE,
+	CONSTRAINT `FK_Exports_NotaFiscal_InvoiceId` FOREIGN KEY (`InvoiceId`) REFERENCES `NotaFiscal` (`Id`) ON UPDATE CASCADE ON DELETE CASCADE
+)
+;
